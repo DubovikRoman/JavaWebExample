@@ -41,11 +41,10 @@ public class ControllerTest {
         command_parameters.put("authors", "Альсевич Мазаник");
         command_parameters.put("publishing house", "БГУ");
         command_parameters.put("year", null);
-        Controller.getInstance().doBookCommand(type_command, command_parameters);
-        List<CustomBook> actual = BookList.getInstance().getBooks();
-        int expected_size = 0;
-        int actual_size = actual.size();
-        Assert.assertEquals(actual_size, expected_size);
+        command_parameters = Controller.getInstance().doBookCommand(type_command, command_parameters);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("status", "com.dubovik.library.model.exception.ServiceException: Add book is null");
+        Assert.assertEquals(command_parameters, expected);
     }
 
     @Test
@@ -58,26 +57,24 @@ public class ControllerTest {
         command_parameters.put("publishing house", "БГУ");
         command_parameters.put("year", "2012");
         command_parameters = Controller.getInstance().doBookCommand(type_command, command_parameters);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("status", "Book is removed successfully");
+        Assert.assertEquals(command_parameters, expected);
     }
 
     @Test
     public void testDoBookRemoveCommandFail() throws DaoException {
         BookList.getInstance().clear();
-        CustomBook book = new CustomBook("Дифференциальные уравнения", 2012,
-                new String[]{"Альсевич", "Мазаник"}, "БГУ");
-        BookList.getInstance().addBook(book);
-
         String type_command = "REMOVE_BOOK";
         Map<String, String> command_parameters = new HashMap<>();
         command_parameters.put("title", "Дифференциальные уравнения");
         command_parameters.put("authors", "Альсевич Мазаник");
-        command_parameters.put("publishing house", "БГУ1");
+        command_parameters.put("publishing house", "БГУ");
         command_parameters.put("year", "2012");
-        Controller.getInstance().doBookCommand(type_command, command_parameters);
-        List<CustomBook> actual = BookList.getInstance().getBooks();
-        int expected_size = 1;
-        int actual_size = actual.size();
-        Assert.assertEquals(actual_size, expected_size);
+        command_parameters = Controller.getInstance().doBookCommand(type_command, command_parameters);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("status", "There is no such book to delete");
+        Assert.assertEquals(command_parameters, expected);
     }
 
     @Test
@@ -86,14 +83,19 @@ public class ControllerTest {
         Map<String, String> command_parameters = new HashMap<>();
         command_parameters.put("key", "11");
         Map<String, String> found = Controller.getInstance().doBookCommand(type_command, command_parameters);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("status", "there is no book with id: 11");
+        Assert.assertEquals(found, expected);
     }
 
     @Test
     public void testDoBookFindCommandTitle() throws DaoException {
         String type_command = "FIND_BY_TITLE";
         Map<String, String> command_parameters = new HashMap<>();
-        command_parameters.put("key", "Дифференциальные уравнения");
+        command_parameters.put("key", "Геометрические уравнения");
         Map<String, String> found = Controller.getInstance().doBookCommand(type_command, command_parameters);
+        int expected_count_of_found = 2;
+        Assert.assertEquals(expected_count_of_found, found.size());
     }
 
     @Test
